@@ -1,0 +1,17 @@
+!!!
+%html
+  %head
+    %title TomKane: Change Password
+  %body
+    = haml :_flash
+    %h1 Change Password
+    %form(method="post")
+      - if session["trustee"]
+        %p
+          Username:
+          %input(name="username" value="#{params['username'] || session["ldap"].uid[0]}")
+      %p
+        New Password:
+        %input(name="password" type="password")
+      %p
+        %input(type="submit")

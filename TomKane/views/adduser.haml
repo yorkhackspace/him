@@ -1,0 +1,46 @@
+!!!
+%html
+  %head
+    %title TomKane: Add User
+  %body
+    = haml :_flash
+    %h1 Add User
+    %form(method="post")
+      %p
+        Username:
+        %input(name="username" value="#{params['username']}")
+        %br/
+        Password:
+        %input(name="password" type="password")
+      %p
+        First name:
+        %input(name="firstname" value="#{params['firstname']}")
+        %br/
+        Surname:
+        %input(name="surname" value="#{params['surname']}")
+      %p
+        Member?
+        - if params['member'] == "false"
+          %input(name="member" type="checkbox")
+        - else
+          %input(name="member" type="checkbox" checked)
+        %br/
+        Trustee?
+        - if params['trustee'].nil?
+          %input(name="trustee" type="checkbox")
+        - else
+          %input(name="trustee" type="checkbox" checked)
+        %br/
+        Radius?
+        - if params['radius'] == "false"
+          %input(name="radius" type="checkbox")
+        - else
+          %input(name="radius" type="checkbox" checked)
+        %br/
+        Unix?
+        - if params['unix'].nil?
+          %input(name="unix" type="checkbox")
+        - else
+          %input(name="unix" type="checkbox" checked)
+      %p
+        %input(type="submit")

@@ -1,0 +1,7 @@
+h1. HIM
+
+This is the Hackspace Identity Manager. We use this at York Hackspace for managing members on our LDAP server.
+
+h2. TomKane
+
+This is the web-based GUI front-end to HIM.

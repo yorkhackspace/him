@@ -1,0 +1,52 @@
+!!!
+%html
+  %head
+    %title TomKane: Modify User
+  %body
+    = haml :_flash
+    %h1 Modify User
+    %p
+      = "You are #{@luser[:member] ? "a" : "not a"} member of York Hackspace."
+      %br/
+      = "You are #{@luser[:trustee] ? "a" : "not a"} member of the board of trustees."
+      %br/
+      = "You #{@luser[:radius] ? "can" : "cannot"} log into Spacenet WiFi."
+      %br/
+      = "You #{@luser[:unix] ? "can" : "cannot"} log into Unix machines."
+    %form(method="post")
+      %p
+        Username:
+        %input(name="username" disabled value="#{@luser[:uid]}")
+      %p
+        First name:
+        %input(name="firstname" value="#{@luser[:cn]}")
+        %br/
+        Surname:
+        %input(name="surname" value="#{@luser[:sn]}")
+      - if session["trustee"]
+        %p
+          Member?
+          - if @luser[:member]
+            %input(name="member" type="checkbox" checked)
+          - else
+            %input(name="member" type="checkbox")
+          %br/
+          Trustee?
+          - if @luser[:trustee]
+            %input(name="trustee" type="checkbox" checked)
+          - else
+            %input(name="trustee" type="checkbox")
+          %br/
+          Radius?
+          - if @luser[:radius]
+            %input(name="radius" type="checkbox" checked)
+          - else
+            %input(name="radius" type="checkbox")
+          %br/
+          Unix?
+          - if @luser[:unix]
+            %input(name="unix" type="checkbox" checked)
+          - else
+            %input(name="unix" type="checkbox")
+      %p
+        %input(type="submit")

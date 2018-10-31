@@ -1,0 +1,16 @@
+!!!
+%html
+  %head
+    %title TomKane: Delete User
+  %body
+    = haml :_flash
+    %h1 Delete User
+    %form(method="post")
+      %p
+        Username:
+        %input(name="username" value="#{params['username']}")
+        %br/
+        Again:
+        %input(name="username2")
+      %p
+        %input(type="submit")

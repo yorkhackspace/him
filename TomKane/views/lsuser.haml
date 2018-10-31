@@ -1,0 +1,37 @@
+!!!
+%html
+  %head
+    %title TomKane: List Users
+  %body
+    = haml :_flash
+    %h1 Users
+    %table(border="1")
+      %tr
+        %th Username
+        %th Name
+        %th Member?
+        %th Trustee?
+        %th Radius?
+        %th Unix?
+      - @ldapusers.each do |luser|
+        - rdn = "uid=#{luser.uid[0]},ou=Users,dc=york,dc=hackspace,dc=org,dc=uk"
+        %tr
+          %td
+            %a(href="/moduser?username=#{h luser.uid[0]}")= h luser.uid[0]
+          %td= "#{h luser.cn[0]} #{h luser.sn[0]}"
+          - if @ldapgroups[:members].include?(rdn)
+            %td(bgcolor="4dff4d") &#x2714;
+          - else
+            %td(bgcolor="ff4d4d") &#x2718;
+          - if @ldapgroups[:trustees].include?(rdn)
+            %td(bgcolor="4dff4d") &#x2714;
+          - else
+            %td(bgcolor="ff4d4d") &#x2718;
+          - if @ldapgroups[:radius].include?(rdn)
+            %td(bgcolor="4dff4d") &#x2714;
+          - else
+            %td(bgcolor="ff4d4d") &#x2718;
+          - if @ldapgroups[:unix].include?(rdn)
+            %td(bgcolor="4dff4d") &#x2714;
+          - else
+            %td(bgcolor="ff4d4d") &#x2718;

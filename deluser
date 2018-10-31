@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+require 'net/ldap'
+require 'securerandom'
+require 'digest/sha1'
+require 'base64'
+require 'io/console'
+
+LDAPPASSWD = File.read("ldap.passwd").chomp
+
+ldap = Net::LDAP.new(
+  :host => '127.0.0.1',
+  :port => 389,
+  :auth => {
+    :method => :simple,
+    :username => "cn=admin,dc=york,dc=hackspace,dc=org,dc=uk",
+    :password => LDAPPASSWD
+  }
+)
+
+userbase = "ou=Users,dc=york,dc=hackspace,dc=org,dc=uk"
+groupbase = "ou=Groups,dc=york,dc=hackspace,dc=org,dc=uk"
+
+uid = ""
+
+loop do
+  print "Username: "
+  uid = gets.chomp
+
+  persons = ldap.search(
+    :base => userbase,
+    :filter => Net::LDAP::Filter.eq("uid", uid)
+  )
+
+  break unless persons.empty?
+
+  puts "Username not in use. Try again, Dumdum."
+end
+
+rdn = "uid=#{uid},#{userbase}"
+
+ldap.delete(
+  :dn => rdn
+)
+
+ldap.modify(
+  :dn => "cn=Members,#{groupbase}",
+  :operations => [
+    [:delete, :member, rdn]
+  ]
+)
+
+ldap.modify(
+  :dn => "cn=Trustees,#{groupbase}",
+  :operations => [
+    [:delete, :member, rdn]
+  ]
+)
+
+ldap.modify(
+  :dn => "cn=Radius,#{groupbase}",
+  :operations => [
+    [:delete, :member, rdn]
+  ]
+)
+
+ldap.modify(
+  :dn => "cn=Unix,#{groupbase}",
+  :operations => [
+    [:delete, :member, rdn]
+  ]
+)

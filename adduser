@@ -1,0 +1,141 @@
+#!/usr/bin/env ruby
+
+require 'net/ldap'
+require 'securerandom'
+require 'digest/sha1'
+require 'base64'
+require 'io/console'
+
+# Generate 16 hex characters of random
+def generate_salt
+  SecureRandom.hex(16)
+end
+
+# Hash the password using the given salt. If no salt is supplied, use a new
+# one.
+def encode_password(plaintext, salt=generate_salt)
+  raise ArgumentError.new("Password must not be nil") if plaintext.nil?
+
+  ssha = Digest::SHA1.digest(plaintext+salt) + salt
+
+  return "{SSHA}" + Base64.strict_encode64(ssha).chomp
+end
+
+# Check the supplied password against the given hash and return true if they
+# match, else false.
+def check_password(password, ssha)
+  decoded = Base64.decode64(ssha.gsub(/^{SSHA}/, ''))
+  hash = decoded[0..19] # isolate the hash
+  salt = decoded[20..-1] # isolate the salt
+
+  return encode_password(password, salt) == ssha
+end
+
+
+LDAPPASSWD = File.read("ldap.passwd").chomp
+
+ldap = Net::LDAP.new(
+  :host => '127.0.0.1',
+  :port => 389,
+  :auth => {
+    :method => :simple,
+    :username => "cn=admin,dc=york,dc=hackspace,dc=org,dc=uk",
+    :password => LDAPPASSWD
+  }
+)
+
+userbase = "ou=Users,dc=york,dc=hackspace,dc=org,dc=uk"
+groupbase = "ou=Groups,dc=york,dc=hackspace,dc=org,dc=uk"
+
+uid = ""
+
+loop do
+  print "Username: "
+  uid = gets.chomp
+
+  filter = Net::LDAP::Filter.eq( "uid", uid )
+  persons = ldap.search( :base => userbase, :filter => filter )
+
+  break if persons.empty?
+
+  puts "Username in use. Try again, Dumdum."
+end
+
+newpass = ""
+
+loop do
+  print "Password: "
+  newpass = STDIN.noecho(&:gets).chomp
+  puts
+  print "Again: "
+  newpass2 = STDIN.noecho(&:gets).chomp
+  puts
+
+  break if newpass == newpass2
+
+  puts "Passwords do not match. Try again, Dumdum."
+end
+
+newhash = encode_password(newpass)
+
+print "First name: "
+cn = gets.chomp
+print "Surname: "
+sn = gets.chomp
+
+print "Member? [Y/n]: "
+member = gets[0].downcase != 'n'
+print "Trustee? [y/N]: "
+trustee = gets[0].downcase == 'y'
+print "Radius? [Y/n]: "
+radius = gets[0].downcase  != 'n'
+print "Unix? [y/N]: "
+unix = gets[0].downcase == 'y'
+
+ldap.add(
+  :dn => "uid=#{uid},#{userbase}",
+  :attributes => {
+    :cn => cn,
+    :sn => sn,
+    :uid => uid,
+    :userPassword => newhash,
+    :objectclass => [
+      "top",
+      "inetOrgPerson",
+      "person",
+      "organizationalPerson"
+    ]
+  }
+)
+
+if member then
+  ldap.add_attribute(
+    "cn=Members,#{groupbase}",
+    :member,
+    "uid=#{uid},#{userbase}"
+  )
+end
+
+if trustee then
+  ldap.add_attribute(
+    "cn=Trusteess,#{groupbase}",
+    :member,
+    "uid=#{uid},#{userbase}"
+  )
+end
+
+if radius then
+  ldap.add_attribute(
+    "cn=Radius,#{groupbase}",
+    :member,
+    "uid=#{uid},#{userbase}"
+  )
+end
+
+if unix then
+  ldap.add_attribute(
+    "cn=Unix,#{groupbase}",
+    :member,
+    "uid=#{uid},#{userbase}"
+  )
+end

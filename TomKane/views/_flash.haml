@@ -1,0 +1,13 @@
+- unless request.path_info.split("/")[1] == "login"
+  %a(href="logout") Log out
+  - unless request.path_info.split("/").empty?
+    %a(href="/") Home
+- unless flash.empty?
+  - if flash[:error] && !flash[:error].empty?
+    %div(style="background-color: #ff4d4d")
+      - flash[:error].each do |err|
+        %p= h err
+  - if flash[:success] && !flash[:success].empty?
+    %div(style="background-color: #4dff4d")
+      - flash[:success].each do |succ|
+        %p= h succ

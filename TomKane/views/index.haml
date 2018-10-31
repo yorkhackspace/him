@@ -1,0 +1,30 @@
+!!!
+%html
+  %head
+    %title TomKane
+  %body
+    = haml :_flash
+    %br/
+    %img(src="http://screenprism.com/assets/img/article/_1080x400/bannerppg.png.jpg" width="800")
+    %h1 Welcome to TomKane, #{session["ldap"].cn[0]}.
+    %ul
+      %li
+        %form(action="moduser")
+          - if session["trustee"]
+            %input(name="username" value="#{session["ldap"].uid[0]}")
+          %input(type="submit" value="Change Details")
+      %li
+        %form(action="passwd")
+          %input(type="submit" value="Change Password")
+    - if session["trustee"]
+      %h2 Admin functions
+      %ul
+        %li
+          %form(action="lsuser")
+            %input(type="submit" value="List Users")
+        %li
+          %form(action="adduser")
+            %input(type="submit" value="Add User")
+        %li
+          %form(action="deluser")
+            %input(type="submit" value="Delete User")
