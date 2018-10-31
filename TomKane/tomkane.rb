@@ -32,13 +32,13 @@ def check_password(password, ssha)
 end
 
 set :environment, :production
-#set :session_secret, "ait4baed3og1vee6Useu"
-#set :sessions, true
+
+SESSIONSECRET = File.read("session.secret").chomp
 
 use Rack::Session::Cookie,
     :key => 'rack.session',
     :path => '/',
-    :secret => 'ait4baed3og1vee6Useu'
+    :secret => SESSIONSECRET
 
 helpers do
   def h(text)
